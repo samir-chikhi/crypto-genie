@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Génie — Dashboard</title>
+<style>
+  /* ── RESET & VARIABLES ─────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0A0E1A;
+    --surface:   #111827;
+    --surface2:  #1E2D42;
+    --border:    #1E2D42;
+    --gold:      #F59E0B;
+    --gold-dim:  rgba(245,158,11,.15);
+    --teal:      #14B8A6;
+    --teal-dim:  rgba(20,184,166,.15);
+    --green:     #22C55E;
+    --green-dim: rgba(34,197,94,.15);
+    --red:       #EF4444;
+    --red-dim:   rgba(239,68,68,.15);
+    --white:     #F1F5F9;
+    --muted:     #64748B;
+    --text:      #CBD5E1;
+    --radius:    10px;
+    --shadow:    0 4px 24px rgba(0,0,0,.45);
+    --font:      'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* ── TOP BAR ───────────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--gold);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 58px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { font-size: 22px; }
+  .logo-text { font-size: 17px; font-weight: 700; color: var(--gold); letter-spacing: .5px; }
+  .logo-sub  { font-size: 11px; color: var(--muted); margin-top: -2px; }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .refresh-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--muted);
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  .dot.error { background: var(--red); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── NAV TABS ──────────────────────────────────────── */
+  nav {
+    background: var(--surface);
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 14px 22px;
+    font-size: 13px; font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+  }
+  .tab:hover  { color: var(--white); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ── LAYOUT ────────────────────────────────────────── */
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── CARDS ─────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 13px; font-weight: 700; letter-spacing: .8px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  @media(max-width:760px){ .grid-4 { grid-template-columns: 1fr 1fr; } }
+  @media(max-width:480px){ .grid-2,.grid-4 { grid-template-columns: 1fr; } }
+
+  /* ── STAT CARDS ────────────────────────────────────── */
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    position: relative; overflow: hidden;
+  }
+  .stat::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat.gold::before  { background: var(--gold); }
+  .stat.teal::before  { background: var(--teal); }
+  .stat.green::before { background: var(--green); }
+  .stat.red::before   { background: var(--red); }
+
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
+  .stat-value { font-size: 24px; font-weight: 700; margin: 4px 0 2px; color: var(--white); }
+  .stat-sub   { font-size: 12px; color: var(--muted); }
+  .stat-value.pos { color: var(--green); }
+  .stat-value.neg { color: var(--red); }
+
+  /* ── MARKET TABLE ──────────────────────────────────── */
+  .market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+    gap: 12px;
+  }
+  .market-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+  }
+  .market-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .market-card .symbol { font-size: 13px; font-weight: 700; color: var(--white); }
+  .market-card .price  { font-size: 18px; font-weight: 700; margin: 4px 0; color: var(--gold); }
+  .market-card .change { font-size: 12px; font-weight: 600; }
+  .market-card .change.pos { color: var(--green); }
+  .market-card .change.neg { color: var(--red); }
+  .market-card .volume { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── PORTFOLIO TABLE ───────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .7px; text-transform: uppercase; color: var(--muted);
+    white-space: nowrap;
+  }
+  th:first-child { border-radius: 8px 0 0 8px; }
+  th:last-child  { border-radius: 0 8px 8px 0; }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  td.pos { color: var(--green); font-weight: 600; }
+  td.neg { color: var(--red);   font-weight: 600; }
+  td.gold { color: var(--gold); font-weight: 600; }
+  .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .badge.pos { background: var(--green-dim); color: var(--green); }
+  .badge.neg { background: var(--red-dim);   color: var(--red); }
+
+  /* ── FORM ELEMENTS ─────────────────────────────────── */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media(max-width:480px){ .form-row { grid-template-columns: 1fr; } }
+
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  input, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--white);
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: var(--font);
+    transition: border-color .2s;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  input::placeholder { color: var(--muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px 18px;
+    border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s, transform .1s;
+    font-family: var(--font);
+  }
+  .btn:hover   { opacity: .88; }
+  .btn:active  { transform: scale(.97); }
+  .btn-gold  { background: var(--gold);  color: #0A0E1A; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* ── ROUTINES ──────────────────────────────────────── */
+  .routine-section { margin-bottom: 28px; }
+  .routine-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+    font-size: 15px; font-weight: 700; color: var(--white);
+  }
+  .routine-icon { font-size: 20px; }
+  .routine-badge { font-size: 11px; color: var(--muted); background: var(--surface2); padding: 2px 10px; border-radius: 20px; }
+
+  .check-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .check-item:hover { border-color: var(--muted); }
+  .check-item.done { border-color: var(--teal-dim); background: var(--teal-dim); }
+
+  .check-item input[type="checkbox"] { display: none; }
+  .check-box {
+    width: 20px; height: 20px; min-width: 20px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, border-color .15s;
+    margin-top: 1px;
+  }
+  .check-item.done .check-box {
+    background: var(--teal);
+    border-color: var(--teal);
+  }
+  .check-box::after { content: '✓'; font-size: 13px; color: white; display: none; }
+  .check-item.done .check-box::after { display: block; }
+  .check-label { font-size: 13.5px; line-height: 1.4; color: var(--text); }
+  .check-item.done .check-label { color: var(--muted); text-decoration: line-through; }
+
+  .progress-bar-wrap { background: var(--surface2); border-radius: 20px; height: 6px; margin-top: 14px; }
+  .progress-bar { height: 6px; border-radius: 20px; background: var(--teal); transition: width .4s; }
+  .progress-label { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* ── ALERTS ────────────────────────────────────────── */
+  .alert-list { display: flex; flex-direction: column; gap: 10px; }
+  .alert-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border-left: 3px solid var(--gold);
+    font-size: 13px;
+  }
+  .alert-item.triggered { border-left-color: var(--red); background: var(--red-dim); }
+  .alert-info { flex: 1; }
+  .alert-sym  { font-weight: 700; color: var(--white); }
+  .alert-cond { color: var(--muted); font-size: 12px; }
+
+  /* ── MODAL ─────────────────────────────────────────── */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%; max-width: 460px;
+    box-shadow: var(--shadow);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--white); margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── TOAST ─────────────────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px; color: var(--white);
+    box-shadow: var(--shadow);
+    transform: translateY(80px); opacity: 0;
+    transition: transform .3s, opacity .3s;
+    z-index: 300;
+    max-width: 300px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-color: var(--green); }
+  #toast.error   { border-color: var(--red);   }
+
+  /* ── EMPTY STATE ───────────────────────────────────── */
+  .empty {
+    text-align: center; padding: 48px 20px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 15px; }
+  .empty-sub  { font-size: 13px; margin-top: 6px; }
+
+  /* ── MISC ──────────────────────────────────────────── */
+  .gap-top { margin-top: 20px; }
+  .gap-top-sm { margin-top: 12px; }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .spacer { flex: 1; }
+  .text-muted { color: var(--muted); font-size: 12px; }
+  .text-gold  { color: var(--gold); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* search */
+  .search-wrap { position: relative; }
+  .search-wrap input { padding-left: 34px; }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+
+  /* disclaimer */
+  .disclaimer {
+    background: var(--red-dim);
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .disclaimer strong { color: var(--red); }
+
+  /* loading spinner */
+  .spin {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-icon">🪙</span>
+    <div>
+      <div class="logo-text">Crypto Génie</div>
+      <div class="logo-sub">Dashboard personnel</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="refresh-indicator">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">Connexion…</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="refreshAll()">↻ Actualiser</button>
+  </div>
+</header>
+
+<!-- NAV TABS -->
+<nav>
+  <div class="tab active" onclick="showTab('marche',this)">📈 Marché</div>
+  <div class="tab" onclick="showTab('portfolio',this)">💼 Portfolio</div>
+  <div class="tab" onclick="showTab('routines',this)">✅ Routines</div>
+  <div class="tab" onclick="showTab('alertes',this)">🔔 Alertes</div>
+  <div class="tab" onclick="showTab('ressources',this)">📚 Ressources</div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ═══ MARCHÉ ═══════════════════════════════════════ -->
+  <div class="section active" id="marche">
+    <div class="disclaimer">
+      <strong>⚠ Avertissement :</strong> Ce dashboard est un outil pédagogique. Il ne constitue pas un conseil d'investissement. N'investissez jamais plus que ce que vous pouvez vous permettre de perdre.
+    </div>
+
+    <div class="row-between gap-top-sm" style="margin-bottom:16px">
+      <div class="card-title">Prix en temps réel <span class="spin" id="marketSpinner" style="display:none"></span></div>
+      <div class="search-wrap" style="width:220px">
+        <span class="search-icon">🔍</span>
+        <input id="marketSearch" type="text" placeholder="Filtrer (ex: BTC)…" oninput="filterMarket()">
+      </div>
+    </div>
+
+    <div class="market-grid" id="marketGrid">
+      <div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Chargement…</div></div>
+    </div>
+
+    <div class="card gap-top">
+      <div class="card-title">➕ Ajouter une paire à surveiller</div>
+      <div class="form-row">
+        <div>
+          <label>Paire Binance (ex: SOLUSDT)</label>
+          <input id="newPair" type="text" placeholder="ADAUSDT" onkeydown="if(event.key==='Enter')addPair()">
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="btn btn-gold" onclick="addPair()">Ajouter</button>
+        </div>
+      </div>
+      <p class="text-muted">Vos paires suivies sont sauvegardées localement dans votre navigateur.</p>
+    </div>
+  </div>
+
+  <!-- ═══ PORTFOLIO ════════════════════════════════════ -->
+  <div class="section" id="portfolio">
+
+    <!-- Summary stats -->
+    <div class="grid-4" style="margin-bottom:20px" id="portfolioStats">
+      <div class="stat gold">
+        <div class="stat-label">Investi total</div>
+        <div class="stat-value" id="totalInvested">—</div>
+        <div class="stat-sub">Cumul des achats</div>
+      </div>
+      <div class="stat teal">
+        <div class="stat-label">Valeur actuelle</div>
+        <div class="stat-value" id="totalValue">—</div>
+        <div class="stat-sub">Prix temps réel</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-label">Plus/Moins-value</div>
+        <div class="stat-value" id="totalPL">—</div>
+        <div class="stat-sub" id="totalPLpct">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Positions ouvertes</div>
+        <div class="stat-value" id="posCount">—</div>
+        <div class="stat-sub">Cryptos différentes</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row-between" style="margin-bottom:16px">
+        <div class="card-title">Mes positions</div>
+        <button class="btn btn-gold btn-sm" onclick="openAddPosition()">+ Ajouter</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Crypto</th>
+              <th>Prix achat</th>
+              <th>Qté</th>
+              <th>Investi</th>
+              <th>Prix actuel</th>
+              <th>Valeur</th>
+              <th>P/L €</th>
+              <th>P/L %</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="positionsTable">
+            <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">
+              Aucune position — cliquez sur <strong>+ Ajouter</strong>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card gap-top">
+      <div class="card-title">Règles de gestion</div>
+      <div class="grid-2">
+        <div style="padding:12px;background:var(--red-dim);border-radius:8px;border:1px solid var(--red)">
+          <div style="font-weight:700;color:var(--red);margin-bottom:8px">Les 3 JAMAIS</div>
+          <div style="font-size:13px;line-height:1.7;color:var(--text)">
+            ✕ Jamais investir plus que ce qu'on peut perdre<br>
+            ✕ Jamais investir sous le coup d'une émotion<br>
+            ✕ Jamais tout mettre sur une seule crypto
+          </div>
+        </div>
+        <div style="padding:12px;background:var(--teal-dim);border-radius:8px;border:1px solid var(--teal)">
+          <div style="font-weight:700;color:var(--teal);margin-bottom:8px">Stratégie recommandée</div>
+          <div style="font-size:13px;line-height:1.7;color:var(--text)">
+            ✓ DCA : même somme, même jour chaque mois<br>
+            ✓ 1 à 3 cryptos maximum (BTC / ETH en priorité)<br>
+            ✓ Horizon : minimum 6-12 mois
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ROUTINES ═════════════════════════════════════ -->
+  <div class="section" id="routines">
+    <div class="card">
+      <div class="card-title">🗓 Mes routines — semaine du <span id="weekLabel"></span></div>
+
+      <!-- Quotidien -->
+      <div class="routine-section">
+        <div class="routine-header">
+          <span class="routine-icon">🕒</span>
+          Quotidien
+          <span class="routine-badge">5 min max</span>
+        </div>
+        <div id="routines-daily"></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="prog-daily" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="prog-daily-label"></div>
+      </div>
+
+      <hr>
+
+      <!-- Hebdo -->
+      <div class="routine-section">
+        <div class="routine-header">
+          <span class="routine-icon">📆</span>
+          Hebdomadaire
+          <span class="routine-badge">15 min</span>
+        </div>
+        <div id="routines-weekly"></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="prog-weekly" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="prog-weekly-label"></div>
+      </div>
+
+      <hr>
+
+      <!-- Mensuel -->
+      <div class="routine-section">
+        <div class="routine-header">
+          <span class="routine-icon">📅</span>
+          Mensuel
+          <span class="routine-badge">30 min</span>
+        </div>
+        <div id="routines-monthly"></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="prog-monthly" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="prog-monthly-label"></div>
+      </div>
+
+      <hr>
+      <div class="row-between">
+        <span class="text-muted">Les cases sont sauvegardées localement. Elles se remettent à zéro chaque semaine.</span>
+        <button class="btn btn-ghost btn-sm" onclick="resetRoutines()">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ALERTES ══════════════════════════════════════ -->
+  <div class="section" id="alertes">
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">+ Créer une alerte de prix</div>
+      <div class="form-row">
+        <div>
+          <label>Paire (ex: BTCUSDT)</label>
+          <input id="alertPair" type="text" placeholder="BTCUSDT">
+        </div>
+        <div>
+          <label>Condition</label>
+          <select id="alertCond">
+            <option value="above">Prix dépasse</option>
+            <option value="below">Prix descend sous</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Prix cible (€ / USDT)</label>
+          <input id="alertPrice" type="number" placeholder="70000">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn btn-gold" onclick="addAlert()">Créer l'alerte</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔔 Mes alertes</div>
+      <div class="alert-list" id="alertList">
+        <div class="empty">
+          <div class="empty-icon">🔔</div>
+          <div class="empty-text">Aucune alerte configurée</div>
+          <div class="empty-sub">Créez une alerte ci-dessus pour être prévenu d'un changement de prix.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RESSOURCES ═══════════════════════════════════ -->
+  <div class="section" id="ressources">
+    <div class="grid-2" style="margin-bottom:20px">
+
+      <div class="card">
+        <div class="card-title" style="color:var(--red)">🔴 Sources à éviter</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="padding:10px 12px;background:var(--red-dim);border-radius:8px;font-size:13px;color:var(--text)">
+            ✕ « Rendement garanti 20-30%/mois »
+          </div>
+          <div style="padding:10px 12px;background:var(--red-dim);border-radius:8px;font-size:13px;color:var(--text)">
+            ✕ Groupes Telegram obscurs de « signaux »
+          </div>
+          <div style="padding:10px 12px;background:var(--red-dim);border-radius:8px;font-size:13px;color:var(--text)">
+            ✕ Influenceurs qui montrent leur villa
+          </div>
+          <div style="padding:10px 12px;background:var(--red-dim);border-radius:8px;font-size:13px;color:var(--text)">
+            ✕ Plateformes absentes du registre AMF
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--green)">🟢 Sources fiables</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="https://www.amf-france.org" target="_blank" style="text-decoration:none">
+            <div style="padding:10px 12px;background:var(--green-dim);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--white)">🛡 AMF France</div>
+                <div style="font-size:11px;color:var(--muted)">Régulateur officiel — mises en garde</div>
+              </div>
+              <span style="color:var(--green)">→</span>
+            </div>
+          </a>
+          <a href="https://academy.binance.com/fr" target="_blank" style="text-decoration:none">
+            <div style="padding:10px 12px;background:var(--green-dim);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--white)">🎓 Binance Academy</div>
+                <div style="font-size:11px;color:var(--muted)">Cours gratuits, débutant à avancé</div>
+              </div>
+              <span style="color:var(--green)">→</span>
+            </div>
+          </a>
+          <a href="https://coinmarketcap.com" target="_blank" style="text-decoration:none">
+            <div style="padding:10px 12px;background:var(--green-dim);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--white)">📊 CoinMarketCap</div>
+                <div style="font-size:11px;color:var(--muted)">Prix, volumes, classements</div>
+              </div>
+              <span style="color:var(--green)">→</span>
+            </div>
+          </a>
+          <a href="https://coinacademy.fr" target="_blank" style="text-decoration:none">
+            <div style="padding:10px 12px;background:var(--green-dim);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--white)">🇫🇷 Coin Academy</div>
+                <div style="font-size:11px;color:var(--muted)">Contenu pédagogique francophone</div>
+              </div>
+              <span style="color:var(--green)">→</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📖 Lexique crypto — les mots clés</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Terme</th><th>Définition simple</th></tr></thead>
+          <tbody>
+            <tr><td class="gold">Bitcoin (BTC)</td><td>La première et plus grande crypto. Plafonnée à 21 millions d'unités.</td></tr>
+            <tr><td class="gold">Ethereum (ETH)</td><td>Plateforme de contrats intelligents. 2e crypto par capitalisation.</td></tr>
+            <tr><td class="gold">Blockchain</td><td>Base de données partagée et infalsifiable, répartie sur des milliers d'ordinateurs.</td></tr>
+            <tr><td class="gold">DCA</td><td>Dollar Cost Averaging : investir une somme fixe à intervalles réguliers, quoi qu'il arrive.</td></tr>
+            <tr><td class="gold">HODL</td><td>Conserver ses cryptos sur le long terme, sans les vendre lors des baisses.</td></tr>
+            <tr><td class="gold">Stablecoin</td><td>Crypto dont la valeur est indexée sur une devise (ex: USDT = 1 dollar).</td></tr>
+            <tr><td class="gold">Market order</td><td>Ordre d'achat/vente au prix immédiat du marché.</td></tr>
+            <tr><td class="gold">Limit order</td><td>Ordre d'achat/vente à un prix précis que vous définissez.</td></tr>
+            <tr><td class="gold">Wallet</td><td>Portefeuille crypto : logiciel ou matériel qui stocke vos clés privées.</td></tr>
+            <tr><td class="gold">KYC</td><td>Know Your Customer : vérification d'identité obligatoire sur les plateformes régulées.</td></tr>
+            <tr><td class="gold">PSAN/PSCA</td><td>Enregistrement auprès de l'AMF pour opérer légalement en France.</td></tr>
+            <tr><td class="gold">Flat tax</td><td>Imposition des plus-values crypto à 30% en France (si >305€/an).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL AJOUT POSITION -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Ajouter une position</div>
+    <div class="form-row">
+      <div>
+        <label>Paire Binance *</label>
+        <input id="pos_pair" type="text" placeholder="BTCUSDT">
+      </div>
+      <div>
+        <label>Date d'achat</label>
+        <input id="pos_date" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Prix d'achat (€ ou USDT) *</label>
+        <input id="pos_buyPrice" type="number" placeholder="60000" step="any">
+      </div>
+      <div>
+        <label>Quantité achetée *</label>
+        <input id="pos_qty" type="number" placeholder="0.001" step="any">
+      </div>
+    </div>
+    <div>
+      <label>Note (optionnel)</label>
+      <input id="pos_note" type="text" placeholder="Ex: DCA mensuel juin">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-gold" onclick="savePosition()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────
+const BINANCE_API = 'https://api.binance.com/api/v3';
+const REFRESH_INTERVAL = 30000; // 30 secondes
+const DEFAULT_PAIRS = ['BTCUSDT','ETHUSDT','SOLUSDT','BNBUSDT','XRPUSDT','DOGEUSDT'];
+
+// ─── STATE ────────────────────────────────────────────────────
+let marketData = {};  // { BTCUSDT: { price, change24h, volume24h } }
+let positions  = loadJSON('cg_positions', []);
+let watchlist  = loadJSON('cg_watchlist', DEFAULT_PAIRS);
+let alerts     = loadJSON('cg_alerts', []);
+let routineChecks = loadJSON('cg_routines', {});
+
+const ROUTINES = {
+  daily: [
+    { id:'d1', text:'Regarder les prix une seule fois (ou pas du tout)' },
+    { id:'d2', text:'Noter mon humeur : 😌 calme ou 😫 stressé' },
+    { id:'d3', text:'Ne prendre aucune décision sous le coup d\'une émotion' },
+  ],
+  weekly: [
+    { id:'w1', text:'Faire mon DCA (si c\'est le jour choisi)' },
+    { id:'w2', text:'Mettre à jour mon tableau de bord' },
+    { id:'w3', text:'Lire 1 article pédagogique (AMF, Academy…)' },
+    { id:'w4', text:'Vérifier les mises en garde AMF / arnaques' },
+  ],
+  monthly: [
+    { id:'m1', text:'Vérifier que les sommes investies restent psychologiquement supportables' },
+    { id:'m2', text:'Décider : continuer / ralentir / arrêter sereinement' },
+    { id:'m3', text:'Sauvegarder / exporter mon tableau de bord' },
+    { id:'m4', text:'Relire les 3 JAMAIS' },
+  ]
+};
+
+// ─── STORAGE HELPERS ─────────────────────────────────────────
+function loadJSON(key, def) {
+  try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; }
+}
+function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+// ─── TOAST ───────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 3000);
+}
+
+// ─── TABS ────────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ─── BINANCE API ─────────────────────────────────────────────
+async function fetchPrices(symbols) {
+  try {
+    const promises = symbols.map(sym =>
+      fetch(`${BINANCE_API}/ticker/24hr?symbol=${sym}`)
+        .then(r => r.json())
+        .catch(() => null)
+    );
+    const results = await Promise.all(promises);
+    results.forEach(d => {
+      if (!d || !d.symbol) return;
+      marketData[d.symbol] = {
+        price:    parseFloat(d.lastPrice),
+        change24h: parseFloat(d.priceChangePercent),
+        volume24h: parseFloat(d.quoteVolume),
+        high24h:  parseFloat(d.highPrice),
+        low24h:   parseFloat(d.lowPrice),
+      };
+    });
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+async function refreshAll() {
+  document.getElementById('marketSpinner').style.display = 'inline-block';
+  const allSymbols = [...new Set([
+    ...watchlist,
+    ...positions.map(p => p.pair)
+  ])];
+  const ok = await fetchPrices(allSymbols);
+  document.getElementById('marketSpinner').style.display = 'none';
+
+  const dot  = document.getElementById('statusDot');
+  const txt  = document.getElementById('statusText');
+  if (ok) {
+    dot.className = 'dot';
+    txt.textContent = 'Live · ' + new Date().toLocaleTimeString('fr-FR');
+  } else {
+    dot.className = 'dot error';
+    txt.textContent = 'Erreur API';
+  }
+
+  renderMarket();
+  renderPortfolio();
+  checkAlerts();
+}
+
+// ─── MARKET ──────────────────────────────────────────────────
+function renderMarket() {
+  const grid  = document.getElementById('marketGrid');
+  const query = document.getElementById('marketSearch').value.toLowerCase();
+  const pairs = watchlist.filter(p => p.toLowerCase().includes(query));
+
+  if (!pairs.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Aucune paire trouvée</div></div>';
+    return;
+  }
+
+  grid.innerHTML = pairs.map(pair => {
+    const d = marketData[pair];
+    const sym = pair.replace('USDT','').replace('EUR','');
+    if (!d) return `
+      <div class="market-card">
+        <div class="symbol">${sym} / USDT</div>
+        <div class="price">—</div>
+        <div class="change" style="color:var(--muted)">Chargement…</div>
+      </div>`;
+    const pos = d.change24h >= 0;
+    return `
+      <div class="market-card" onclick="prefillAdd('${pair}')">
+        <div class="symbol">${sym} <span style="font-weight:400;color:var(--muted);font-size:11px">/ USDT</span></div>
+        <div class="price">${fmt(d.price)}</div>
+        <div class="change ${pos?'pos':'neg'}">${pos?'▲':'▼'} ${Math.abs(d.change24h).toFixed(2)}% (24h)</div>
+        <div class="volume">Vol: ${fmtBig(d.volume24h)} USDT</div>
+      </div>`;
+  }).join('');
+}
+
+function filterMarket() { renderMarket(); }
+
+function addPair() {
+  const val = document.getElementById('newPair').value.trim().toUpperCase();
+  if (!val) return;
+  const sym = val.includes('USDT') || val.includes('EUR') ? val : val + 'USDT';
+  if (!watchlist.includes(sym)) {
+    watchlist.push(sym);
+    saveJSON('cg_watchlist', watchlist);
+    refreshAll();
+    document.getElementById('newPair').value = '';
+    toast('Paire ' + sym + ' ajoutée !');
+  } else {
+    toast('Déjà dans votre watchlist', 'error');
+  }
+}
+
+// ─── PORTFOLIO ───────────────────────────────────────────────
+function openAddPosition() {
+  document.getElementById('pos_date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('addModal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('addModal').classList.remove('open');
+  ['pos_pair','pos_buyPrice','pos_qty','pos_note'].forEach(id => document.getElementById(id).value = '');
+}
+
+function prefillAdd(pair) {
+  document.getElementById('pos_pair').value = pair;
+  const d = marketData[pair];
+  if (d) document.getElementById('pos_buyPrice').value = d.price.toFixed(2);
+  openAddPosition();
+}
+
+function savePosition() {
+  const pair     = document.getElementById('pos_pair').value.trim().toUpperCase();
+  const buyPrice = parseFloat(document.getElementById('pos_buyPrice').value);
+  const qty      = parseFloat(document.getElementById('pos_qty').value);
+  const date     = document.getElementById('pos_date').value;
+  const note     = document.getElementById('pos_note').value;
+
+  if (!pair || isNaN(buyPrice) || isNaN(qty)) {
+    toast('Remplissez la paire, le prix et la quantité', 'error'); return;
+  }
+  const sym = pair.includes('USDT') ? pair : pair + 'USDT';
+  positions.push({ id: Date.now(), pair: sym, buyPrice, qty, date, note });
+  saveJSON('cg_positions', positions);
+  if (!watchlist.includes(sym)) { watchlist.push(sym); saveJSON('cg_watchlist', watchlist); }
+  closeModal();
+  refreshAll();
+  toast('Position ajoutée !');
+}
+
+function deletePosition(id) {
+  positions = positions.filter(p => p.id !== id);
+  saveJSON('cg_positions', positions);
+  renderPortfolio();
+  toast('Position supprimée', 'error');
+}
+
+function renderPortfolio() {
+  const tbody = document.getElementById('positionsTable');
+  if (!positions.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Aucune position — cliquez sur <strong>+ Ajouter</strong></td></tr>';
+    document.getElementById('totalInvested').textContent = '—';
+    document.getElementById('totalValue').textContent = '—';
+    document.getElementById('totalPL').textContent = '—';
+    document.getElementById('totalPLpct').textContent = '—';
+    document.getElementById('posCount').textContent = '—';
+    return;
+  }
+
+  let sumInvested = 0, sumValue = 0;
+  tbody.innerHTML = positions.map(p => {
+    const d       = marketData[p.pair];
+    const invested = p.buyPrice * p.qty;
+    const curPrice = d ? d.price : null;
+    const curValue = curPrice ? curPrice * p.qty : null;
+    const pl       = curValue ? curValue - invested : null;
+    const plPct    = pl !== null ? (pl / invested) * 100 : null;
+    const sym      = p.pair.replace('USDT','');
+
+    if (curValue !== null) { sumInvested += invested; sumValue += curValue; }
+
+    const plCls = pl === null ? '' : pl >= 0 ? 'pos' : 'neg';
+
+    return `<tr>
+      <td class="gold">${sym}</td>
+      <td>${fmt(p.buyPrice)}</td>
+      <td>${p.qty}</td>
+      <td>${fmt(invested)}</td>
+      <td>${curPrice ? fmt(curPrice) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${curValue ? fmt(curValue) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td class="${plCls}">${pl !== null ? (pl>=0?'+':'')+fmt(pl) : '—'}</td>
+      <td>${plPct !== null ? `<span class="badge ${plCls}">${plPct>=0?'+':''}${plPct.toFixed(2)}%</span>` : '—'}</td>
+      <td style="color:var(--muted);font-size:12px">${p.date || '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletePosition(${p.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  const totalPL  = sumValue - sumInvested;
+  const plPct    = sumInvested ? (totalPL / sumInvested) * 100 : 0;
+  const plCls    = totalPL >= 0 ? 'pos' : 'neg';
+
+  document.getElementById('totalInvested').textContent = fmt(sumInvested);
+  document.getElementById('totalValue').textContent    = fmt(sumValue);
+  document.getElementById('posCount').textContent      = new Set(positions.map(p=>p.pair)).size;
+
+  const plEl = document.getElementById('totalPL');
+  plEl.textContent = (totalPL>=0?'+':'') + fmt(totalPL);
+  plEl.className   = 'stat-value ' + plCls;
+  document.getElementById('totalPLpct').textContent = (plPct>=0?'+':'') + plPct.toFixed(2) + '%';
+}
+
+// ─── ROUTINES ────────────────────────────────────────────────
+function weekKey() {
+  const d = new Date(); const day = d.getDay();
+  const monday = new Date(d); monday.setDate(d.getDate() - (day===0?6:day-1));
+  return monday.toISOString().slice(0,10);
+}
+
+function initRoutines() {
+  const key = weekKey();
+  document.getElementById('weekLabel').textContent = key;
+  // Reset if new week
+  const stored = loadJSON('cg_routines_week', {});
+  if (stored.week !== key) {
+    routineChecks = {};
+    saveJSON('cg_routines_week', { week: key, checks: {} });
+  } else {
+    routineChecks = stored.checks || {};
+  }
+  renderRoutines();
+}
+
+function renderRoutines() {
+  renderRoutineGroup('routines-daily', ROUTINES.daily, 'prog-daily', 'prog-daily-label');
+  renderRoutineGroup('routines-weekly', ROUTINES.weekly, 'prog-weekly', 'prog-weekly-label');
+  renderRoutineGroup('routines-monthly', ROUTINES.monthly, 'prog-monthly', 'prog-monthly-label');
+}
+
+function renderRoutineGroup(containerId, items, progId, labelId) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = items.map(item => {
+    const done = !!routineChecks[item.id];
+    return `
+      <div class="check-item ${done?'done':''}" onclick="toggleCheck('${item.id}')">
+        <div class="check-box"></div>
+        <div class="check-label">${item.text}</div>
+      </div>`;
+  }).join('');
+  const done = items.filter(i => routineChecks[i.id]).length;
+  const pct = Math.round((done/items.length)*100);
+  document.getElementById(progId).style.width = pct + '%';
+  document.getElementById(labelId).textContent = `${done} / ${items.length} complétées (${pct}%)`;
+}
+
+function toggleCheck(id) {
+  routineChecks[id] = !routineChecks[id];
+  const stored = { week: weekKey(), checks: routineChecks };
+  saveJSON('cg_routines_week', stored);
+  renderRoutines();
+}
+
+function resetRoutines() {
+  if (!confirm('Réinitialiser toutes les cases à cocher ?')) return;
+  routineChecks = {};
+  saveJSON('cg_routines_week', { week: weekKey(), checks: {} });
+  renderRoutines();
+  toast('Routines remises à zéro');
+}
+
+// ─── ALERTS ──────────────────────────────────────────────────
+function addAlert() {
+  const pair  = document.getElementById('alertPair').value.trim().toUpperCase();
+  const cond  = document.getElementById('alertCond').value;
+  const price = parseFloat(document.getElementById('alertPrice').value);
+  if (!pair || isNaN(price)) { toast('Remplissez tous les champs', 'error'); return; }
+  const sym = pair.includes('USDT') ? pair : pair + 'USDT';
+  alerts.push({ id: Date.now(), pair: sym, cond, price, triggered: false });
+  saveJSON('cg_alerts', alerts);
+  renderAlerts();
+  toast('Alerte créée !');
+}
+
+function deleteAlert(id) {
+  alerts = alerts.filter(a => a.id !== id);
+  saveJSON('cg_alerts', alerts);
+  renderAlerts();
+}
+
+function renderAlerts() {
+  const list = document.getElementById('alertList');
+  if (!alerts.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">Aucune alerte configurée</div><div class="empty-sub">Créez une alerte ci-dessus pour être prévenu d\'un changement de prix.</div></div>';
+    return;
+  }
+  list.innerHTML = alerts.map(a => {
+    const sym = a.pair.replace('USDT','');
+    const condTxt = a.cond === 'above' ? 'dépasse' : 'descend sous';
+    return `
+      <div class="alert-item ${a.triggered?'triggered':''}">
+        <div class="alert-info">
+          <div class="alert-sym">${sym} ${a.triggered ? '🔴 DÉCLENCHÉE' : ''}</div>
+          <div class="alert-cond">Prix ${condTxt} ${fmt(a.price)}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteAlert(${a.id})">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function checkAlerts() {
+  let changed = false;
+  alerts.forEach(a => {
+    const d = marketData[a.pair];
+    if (!d) return;
+    const triggered = a.cond === 'above' ? d.price >= a.price : d.price <= a.price;
+    if (triggered && !a.triggered) {
+      a.triggered = true; changed = true;
+      const sym = a.pair.replace('USDT','');
+      const condTxt = a.cond === 'above' ? 'a dépassé' : 'est descendu sous';
+      toast(`🔔 ${sym} ${condTxt} ${fmt(a.price)} !`, 'success');
+    }
+  });
+  if (changed) { saveJSON('cg_alerts', alerts); renderAlerts(); }
+}
+
+// ─── FORMAT HELPERS ──────────────────────────────────────────
+function fmt(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  if (n >= 1000)  return n.toLocaleString('fr-FR', {minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  if (n >= 1)     return n.toFixed(4) + ' €';
+  return n.toFixed(8) + ' €';
+}
+function fmtBig(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(1) + 'G';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n.toFixed(0);
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+(function init() {
+  initRoutines();
+  renderAlerts();
+  refreshAll();
+  setInterval(refreshAll, REFRESH_INTERVAL);
+})();
+</script>
+</body>
+</html>

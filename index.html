@@ -227,14 +227,17 @@ hr{border:none;border-top:1px solid var(--border);margin:18px 0}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
 @media(max-width:700px){.grid-2{grid-template-columns:1fr}}
 </style>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <style>.skip-link{position:absolute;left:-9999px;top:0;z-index:10000;background:#111;color:#fff;padding:10px 18px;border-radius:0 0 8px 0;font:600 15px/1.2 system-ui,sans-serif;text-decoration:none}.skip-link:focus{left:0}:focus-visible{outline:3px solid #2563eb;outline-offset:2px}</style>
 </head>
 <body>
+<a class="skip-link" href="#contenu">Aller au contenu</a>
 
 <!-- HEADER -->
-<header>
-  <a class="logo-block" href="https://www.genie-montauban.fr" target="_blank">
+<header id="contenu">
+  <a class="logo-block" href="https://www.genie-montauban.fr" target="_blank" rel="noopener noreferrer">
     <img class="logo-img" src="https://genie-montauban.fr/logo.png" alt="Génie Montauban"
-         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" fetchpriority="high">
     <div style="display:none;align-items:center;gap:5px">
       <span style="font-size:18px">🪙</span>
       <span style="font-weight:800;color:var(--gold);font-size:14px;letter-spacing:1px">GÉNIE</span>
@@ -429,11 +432,11 @@ hr{border:none;border-top:1px solid var(--border);margin:18px 0}
     </div></div>
     <div class="card"><div class="card-head" style="color:var(--green)">🟢 Sources fiables</div>
     <div class="card-body">
-      <a class="res-link" href="https://www.amf-france.org" target="_blank"><div><div class="res-link-title">🛡 AMF France</div><div class="res-link-sub">Régulateur officiel — mises en garde et acteurs autorisés</div></div><span class="res-arr">→</span></a>
-      <a class="res-link" href="https://academy.binance.com/fr" target="_blank"><div><div class="res-link-title">🎓 Binance Academy</div><div class="res-link-sub">Cours gratuits structurés, en français</div></div><span class="res-arr">→</span></a>
-      <a class="res-link" href="https://coinmarketcap.com" target="_blank"><div><div class="res-link-title">📊 CoinMarketCap</div><div class="res-link-sub">Prix temps réel, volumes, classements</div></div><span class="res-arr">→</span></a>
-      <a class="res-link" href="https://coinacademy.fr" target="_blank"><div><div class="res-link-title">🇫🇷 Coin Academy</div><div class="res-link-sub">Contenu pédagogique entièrement en français</div></div><span class="res-arr">→</span></a>
-      <a class="res-link" href="https://genie-montauban.fr/activites.html" target="_blank"><div><div class="res-link-title">🏛 Génie Montauban — Ateliers</div><div class="res-link-sub">Prochains ateliers et événements du tiers-lieu</div></div><span class="res-arr">→</span></a>
+      <a class="res-link" href="https://www.amf-france.org" target="_blank" rel="noopener noreferrer"><div><div class="res-link-title">🛡 AMF France</div><div class="res-link-sub">Régulateur officiel — mises en garde et acteurs autorisés</div></div><span class="res-arr">→</span></a>
+      <a class="res-link" href="https://academy.binance.com/fr" target="_blank" rel="noopener noreferrer"><div><div class="res-link-title">🎓 Binance Academy</div><div class="res-link-sub">Cours gratuits structurés, en français</div></div><span class="res-arr">→</span></a>
+      <a class="res-link" href="https://coinmarketcap.com" target="_blank" rel="noopener noreferrer"><div><div class="res-link-title">📊 CoinMarketCap</div><div class="res-link-sub">Prix temps réel, volumes, classements</div></div><span class="res-arr">→</span></a>
+      <a class="res-link" href="https://coinacademy.fr" target="_blank" rel="noopener noreferrer"><div><div class="res-link-title">🇫🇷 Coin Academy</div><div class="res-link-sub">Contenu pédagogique entièrement en français</div></div><span class="res-arr">→</span></a>
+      <a class="res-link" href="https://genie-montauban.fr/activites.html" target="_blank" rel="noopener noreferrer"><div><div class="res-link-title">🏛 Génie Montauban — Ateliers</div><div class="res-link-sub">Prochains ateliers et événements du tiers-lieu</div></div><span class="res-arr">→</span></a>
     </div></div>
   </div>
   <div class="card gap"><div class="card-head">📖 Lexique crypto</div>
@@ -464,7 +467,7 @@ hr{border:none;border-top:1px solid var(--border);margin:18px 0}
     Email : <a href="mailto:genie.montauban@gmail.com">genie.montauban@gmail.com</a><br>
     Représentant légal : Samir Chikhi, Président</p>
     <h2>Hébergement</h2>
-    <p><strong>GitHub Pages</strong> — GitHub, Inc., 88 Colin P Kelly Jr Street, San Francisco, CA 94107, États-Unis<br><a href="https://pages.github.com" target="_blank">pages.github.com</a></p>
+    <p><strong>GitHub Pages</strong> — GitHub, Inc., 88 Colin P Kelly Jr Street, San Francisco, CA 94107, États-Unis<br><a href="https://pages.github.com" target="_blank" rel="noopener noreferrer">pages.github.com</a></p>
     <h2>Nature de l'outil</h2>
     <p>Ce dashboard est un <strong>outil pédagogique</strong> développé dans le cadre des ateliers <em>Crypto Génie</em> organisés par l'Association Génie Montauban, tiers-lieu ancré dans l'économie sociale et solidaire.</p>
     <p>Il utilise l'API publique Binance (données de marché) sans clé API. Les données affichées sont fournies à titre informatif uniquement et peuvent présenter un décalage.</p>
@@ -482,13 +485,13 @@ hr{border:none;border-top:1px solid var(--border);margin:18px 0}
     <h2>Propriété intellectuelle</h2>
     <p>Le logo et la marque <strong>Génie Montauban</strong> sont la propriété de l'Association Génie. Le code source de ce dashboard est distribué sous licence MIT — libre d'utilisation, de modification et de partage pour les membres de la communauté Génie.</p>
     <h2>API Binance</h2>
-    <p>Ce dashboard utilise l'API publique Binance (endpoints <code>/api/v3/ticker/24hr</code> et <code>/api/v3/klines</code>) pour afficher des données de marché. Il n'est pas affilié à Binance. Utilisation soumise aux <a href="https://www.binance.com/fr/terms" target="_blank">conditions générales de Binance</a>.</p>
+    <p>Ce dashboard utilise l'API publique Binance (endpoints <code>/api/v3/ticker/24hr</code> et <code>/api/v3/klines</code>) pour afficher des données de marché. Il n'est pas affilié à Binance. Utilisation soumise aux <a href="https://www.binance.com/fr/terms" target="_blank" rel="noopener noreferrer">conditions générales de Binance</a>.</p>
     <h2>Statut réglementaire</h2>
-    <p>L'Association Génie n'est pas un prestataire de services sur actifs numériques (PSAN/PSCA). Ses ateliers ont un caractère exclusivement éducatif. Pour vérifier le statut d'une plateforme : <a href="https://www.amf-france.org/fr/espace-epargnants/proteger-son-epargne/crypto-actifs" target="_blank">amf-france.org</a></p>
+    <p>L'Association Génie n'est pas un prestataire de services sur actifs numériques (PSAN/PSCA). Ses ateliers ont un caractère exclusivement éducatif. Pour vérifier le statut d'une plateforme : <a href="https://www.amf-france.org/fr/espace-epargnants/proteger-son-epargne/crypto-actifs" target="_blank" rel="noopener noreferrer">amf-france.org</a></p>
     <h2>Droit applicable</h2>
     <p>Mentions légales régies par la loi française. Compétence exclusive des tribunaux de Montauban en cas de litige.</p>
     <p style="margin-top:28px;padding-top:14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)">
-      © 2026 Association Génie Montauban — 12 rue du Génie, 82000 Montauban · <a href="https://www.genie-montauban.fr" target="_blank">genie-montauban.fr</a>
+      © 2026 Association Génie Montauban — 12 rue du Génie, 82000 Montauban · <a href="https://www.genie-montauban.fr" target="_blank" rel="noopener noreferrer">genie-montauban.fr</a>
     </p>
   </div>
 </div>
@@ -500,7 +503,7 @@ hr{border:none;border-top:1px solid var(--border);margin:18px 0}
   <div class="footer-inner">
     <div class="footer-brand">
       <img src="https://genie-montauban.fr/logo.png" alt="Génie Montauban"
-           onerror="this.outerHTML='<span style=\'font-size:16px;font-weight:800;color:var(--gold)\'>🪙 GÉNIE</span>'">
+           onerror="this.outerHTML='<span style=\'font-size:16px;font-weight:800;color:var(--gold)\'>🪙 GÉNIE</span>'" loading="lazy" decoding="async">
       <p>Tiers-lieu ancré dans l'économie sociale et solidaire à Montauban. <strong>Crypto Génie</strong> est un atelier pédagogique de l'Association Génie.</p>
       <p style="margin-top:7px;font-size:11px">📍 12 rue du Génie, 82000 Montauban · <a href="tel:+33651509718" style="color:var(--gold)">06 51 50 97 18</a></p>
     </div>
@@ -513,25 +516,25 @@ hr{border:none;border-top:1px solid var(--border);margin:18px 0}
     </div>
     <div class="footer-col">
       <h4>Génie Montauban</h4>
-      <a href="https://www.genie-montauban.fr" target="_blank">Site du tiers-lieu</a>
-      <a href="https://genie-montauban.fr/activites.html" target="_blank">Activités & ateliers</a>
-      <a href="https://genie-montauban.fr/reservation.html" target="_blank">Réserver un espace</a>
-      <a href="https://genie-montauban.fr/Fiche_Adhesion_GENIE_2026.pdf" target="_blank">Adhérer à l'association</a>
+      <a href="https://www.genie-montauban.fr" target="_blank" rel="noopener noreferrer">Site du tiers-lieu</a>
+      <a href="https://genie-montauban.fr/activites.html" target="_blank" rel="noopener noreferrer">Activités & ateliers</a>
+      <a href="https://genie-montauban.fr/reservation.html" target="_blank" rel="noopener noreferrer">Réserver un espace</a>
+      <a href="https://genie-montauban.fr/Fiche_Adhesion_GENIE_2026.pdf" target="_blank" rel="noopener noreferrer">Adhérer à l'association</a>
     </div>
     <div class="footer-col">
       <h4>Informations</h4>
       <a href="#" onclick="showTab('legal',document.querySelectorAll('.tab')[5]);return false">Mentions légales</a>
-      <a href="https://genie-montauban.fr/confidentialite.html" target="_blank">Confidentialité</a>
-      <a href="https://www.amf-france.org" target="_blank">AMF — Régulateur</a>
-      <a href="https://academy.binance.com/fr" target="_blank">Binance Academy</a>
+      <a href="https://genie-montauban.fr/confidentialite.html" target="_blank" rel="noopener noreferrer">Confidentialité</a>
+      <a href="https://www.amf-france.org" target="_blank" rel="noopener noreferrer">AMF — Régulateur</a>
+      <a href="https://academy.binance.com/fr" target="_blank" rel="noopener noreferrer">Binance Academy</a>
     </div>
   </div>
   <div class="footer-bottom">
     <span>© 2026 Association Génie Montauban — Outil pédagogique. Pas un conseil d'investissement.</span>
     <div class="footer-links">
       <a href="#" onclick="showTab('legal',document.querySelectorAll('.tab')[5]);return false">Mentions légales</a>
-      <a href="https://genie-montauban.fr/confidentialite.html" target="_blank">Confidentialité</a>
-      <a href="https://github.com" target="_blank">GitHub</a>
+      <a href="https://genie-montauban.fr/confidentialite.html" target="_blank" rel="noopener noreferrer">Confidentialité</a>
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
   </div>
 </footer>
